@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        td {
+            width: 100px;
+            height: 100px;
+            background-image: url(./img/grave1.png);
+        }
+
+        .red {
+            background-image: url(./img/ghost1.png);
+        }
+
+        .blue {
+            background-image: url(./img/die1.png);
+        }
+
+        body {
+            /* url(圖檔路徑) x位置 y位置, 預設樣式 */
+            cursor: url(./img/crosshair.png) 50 50, auto;
+            background-image: url(./img/bgi.jpg);
+            overflow: hidden;
+        }
+
+        table {
+            position: relative;
+            left: 53%;
+            margin-top: 500px;
+        }
+
+        #startBtn {
+            position: absolute;
+            left: 71%;
+            top: 55%;
+            width:80px;
+            height: 50px;
+        }
+        
+        #record {
+            position: absolute;
+            left: 70%;
+            top: 15%;
+            color: red;
+            font-weight:bold;
+            font-size: 30px;
+        }
+
+        
+    
+    </style>
+</head>
+<body>
+    <table>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+
+    <input type="button" value="開始遊戲" id="startBtn"> <br>
+    <div id="record">
+        本局分數：<span id="scoreText">0</span><br>
+        最強玩家：<span id="highNameText"></span> <br>
+        分數是： <span id="highScoreText"></span><br>
+    </div>
+
+    <script>
+        let score = 0;
+        let scoreText = document.getElementById("scoreText");
+        let startBtn = document.getElementById("startBtn");
+        let tds = document.getElementsByTagName("td");
+
+        // 設定計時器的變數為 0 ，避免被 clearInterval 清掉，才可以重複利用
+        let gameTimer = 0;
+
+        let high = { name: "", score: 0 };
+        let highNameText = document.getElementById("highNameText");
+        let highScoreText = document.getElementById("highScoreText");
+
+        let highStorage = window.localStorage.getItem("highscore");
+        if(highStorage != null){
+            high = JSON.parse(highStorage);
+            highNameText.innerText = high.name;
+            highScoreText.innerText = high.score;
+        }
+
+        startBtn.onclick = () => {
+            // 將開始按鈕停用
+            startBtn.setAttribute("disabled", true);
+
+            // 分數歸 0
+            score = 0;
+            scoreText.innerText = score;
+
+            gameTimer = setInterval(game, 1000);
+            game();
+            setTimeout(()=>{
+                clearInterval(gameTimer);
+                for(let td of tds){
+                    td.classList.remove("red");
+                    td.classList.remove("blue");
+                }
+                alert(`時間到，你得到 ${score} 分!`);
+                startBtn.removeAttribute("disabled");
+                
+                if(score > high.score){
+                    let playerName = prompt("恭禧你得到最高分，請輸入你的名字");
+                    high.name = playerName;
+                    highNameText.innerText = playerName;
+                    high.score = score;
+                    highScoreText.innerText = score;
+
+                    // window.localStorage.setItem 只能存文字
+                    // JSON.stringify 可以將 JSON 陣列轉成文字
+                    window.localStorage.setItem("highscore", JSON.stringify(high));
+                    
+                }
+
+            }, 10000);
+
+        }
+
+        let game = () => {
+            for(let td of tds){
+                td.classList.remove("red");
+                td.classList.remove("blue");
+            }
+            for(let i=0;i<5;i++){
+                let rand = Math.round(Math.random()*8);
+                tds[rand].classList.add("red");
+            }
+        }
+        
+        for(let td of tds){
+            td.onclick = () => {
+                if(td.classList.contains("red")){
+                    td.classList.remove("red");
+                    td.classList.add("blue");
+                    score++;
+                    scoreText.innerText = score;
+                }
+            }
+        }
+
+    </script>
+</body>
+</html>
